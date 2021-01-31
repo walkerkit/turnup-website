@@ -1,7 +1,5 @@
 <template>
-  <div ref="wrapper">
-    <canvas ref="canvas"> </canvas>
-  </div>
+    <canvas ref="canvas" />
 </template>
 <style scoped>
 #progress-pride-canvas {
@@ -63,9 +61,11 @@ class Simulation {
           if (keep < swap) {
             const dc = JSON.parse(JSON.stringify(d));
             d.angle = d0.angle;
-            d.speed = d0.speed;
+            // d.speed = d0.speed;
+            d.speed = (d0.speed * d0.radius) / d.radius;
             d0.angle = dc.angle;
-            d0.speed = dc.speed;
+            // d0.speed = dc.speed;
+            d0.speed = (d.speed * d.radius) / d0.radius;
             d.collided = true;
             d0.collided = true;
           }
@@ -165,15 +165,27 @@ function animationTick(ctx, network, canvas) {
     ctx.fill();
   }
 }
+
 export default {
   name: 'ProgressPrideNetwork',
+  created() {
+    window.addEventListener('resize', this.windowResize);
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.windowResize);
+  },
   mounted() {
-    const network = this.networkInit();
-    this.$refs.canvas.width = network.width;
-    this.$refs.canvas.height = network.height;
-    this.$refs.canvas.style.background = '#111';
+    this.network = this.networkInit();
+    this.$refs.canvas.width = this.network.width;
+    this.$refs.canvas.height = this.network.height;
+    this.$refs.canvas.style.background = '#202329';
     const ctx = this.$refs.canvas.getContext('2d');
-    animationTick(ctx, network, this.$refs.canvas);
+    animationTick(ctx, this.network, this.$refs.canvas);
+  },
+  data() {
+    return {
+      network: null,
+    };
   },
   methods: {
     networkInit() {
@@ -213,6 +225,12 @@ export default {
         node2: nodeTwo,
       });
       return network;
+    },
+    windowResize(e) {
+      this.network.width = e.target.innerWidth;
+      this.$refs.canvas.width = e.target.innerWidth;
+      this.network.height = e.target.innerHeight;
+      this.$refs.canvas.height = e.target.innerHeight;
     },
   },
 };
