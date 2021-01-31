@@ -28,4 +28,4 @@ yarn lint
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
-Added Github Action
+Added Github Action to build and post
