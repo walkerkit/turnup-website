@@ -89,41 +89,44 @@ class Simulation {
       }
       d.pos = geometric.pointTranslate(d.pos, d.angle, d.speed);
     }
-    this.lineData = [];
+    this.lineData.length = 0;
     // let remainderList = this.nodeData; // eslint-disable-line
     let remainderList = []; // eslint-disable-line
-
+    const interConnectCount = 2;
     for (let i = 0; i < this.nodeData.length; i += 1) {
       remainderList.push(i);
     }
     do {
       const tempNode = this.nodeData[remainderList[0]];
       remainderList = remainderList.slice(1);
-      console.log(remainderList);
       let distanceList = [];
       for (let j = 0; j < remainderList.length; j += 1) {
-        const xdiff = Math.abs(tempNode.pos[0] - this.nodeData[remainderList[j]].pos[0]); //eslint-disable-line
-        const ydiff = Math.abs(tempNode.pos[1] - this.nodeData[remainderList[j]].pos[1]); // eslint-disable-line
-        const distance = Math.sqrt(xdiff ** 2 + ydiff ** 2);
+        const xdiff = Math.abs(tempNode.pos[0] - this.nodeData[remainderList[j]].pos[0])**2 ; //eslint-disable-line
+        const ydiff = Math.abs(tempNode.pos[1] - this.nodeData[remainderList[j]].pos[1])**2; // eslint-disable-line
+        const distance = Math.sqrt(xdiff + ydiff);
         distanceList.push([this.nodeData[remainderList[j]].index, distance]);
       }
       distanceList = distanceList.sort((a, b) => a[1] - b[1]);
 
-      const lineList = distanceList.slice(0, 2);
-      console.log(lineList);
-      for (let k = 0; k < lineList.length; k += 1) {
+      const lineList = [];
+      for (let k = 0; k < interConnectCount; k += 1) {
+        if (distanceList[k][1] < this.width * 0.15) {
+          lineList.push(distanceList[k]);
+        }
+      }
+
+      for (let l = 0; l < lineList.length; l += 1) {
         this.addLine(
           {
             node1: tempNode.index,
-            node2: lineList[k][0],
+            node2: lineList[l][0],
           },
         );
       }
-      for (let l = 0; l < lineList.length; l += 1) {
-        remainderList.splice(l, 1);
-      }
-    } while (remainderList.length !== 0);
-    console.log(this.lineData);
+      // for (let m = 0; m < lineList.length; m += 1) {
+      //   remainderList.splice(m, 1);
+      // }
+    } while (remainderList.length > interConnectCount);
   }
 }
 const colourValues = [
@@ -187,7 +190,7 @@ export default {
         network.addNode({
           index: i,
           colour: d3.randomInt(0, 10)(),
-          speed: d3.randomUniform(1.5, 3)(),
+          speed: d3.randomUniform(1.5, 2.5)(),
           angle: d3.randomUniform(0, 360)(),
           pos: [
             d3.randomUniform(radius, network.width - radius)(),

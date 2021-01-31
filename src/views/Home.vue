@@ -7,8 +7,7 @@
       <div id="heading-container">
         <div>
           <h1>TurnUpLondon</h1>
-          <h3>I'm aware the lines are not working correctly.</h3>
-          <h4>Just Wait</h4>
+          <h4>Just you wait.</h4>
         </div>
       </div>
     </div>
