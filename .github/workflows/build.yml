@@ -24,5 +24,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: 22
-          source: "./public/*"
+          source: "./dist/*"
           target: "/home/kit/okula-compose/turnup-website"
