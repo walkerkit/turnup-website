@@ -19,29 +19,29 @@ class Simulation {
     this.width = opts && opts.width ? opts.width : window.innerWidth;
     this.height = opts && opts.height ? opts.height : window.innerHeight;
     this.center = [this.width / 2, this.height / 2];
-    this.data = [];
+    this.nodeData = [];
+    this.lineData = [];
     return this;
   }
 
-  add(datum) {
-    const d = datum || {};
-    d.pos = d.pos || this.center;
-    d.radius = d.radius || 5;
-    d.angle = d.angle || 0;
-    d.speed = d.speed || 1;
-    d.colour = d.colour || 0;
-    this.data.push(d);
+  addNode(datum) {
+    this.nodeData.push(datum);
+    return this;
+  }
+
+  addLine(datum) {
+    this.lineData.push(datum);
     return this;
   }
 
   tick() {
-    // Loop through the data
-    for (let i = 0; i < this.data.length; i += 1) {
-      const d = this.data[i];
+    // Loop through the nodeData
+    for (let i = 0; i < this.nodeData.length; i += 1) {
+      const d = this.nodeData[i];
       d.collided = false;
       // Detect collisions
-      for (let i0 = 0; i0 < this.data.length; i0 += 1) {
-        const d0 = this.data[i0];
+      for (let i0 = 0; i0 < this.nodeData.length; i0 += 1) {
+        const d0 = this.nodeData[i0];
         d0.collided = false;
         // Collision!
         if (
@@ -109,12 +109,21 @@ function animationTick(ctx, network, canvas) {
   ctx.clearRect(0, 0, network.width, network.height);
   // The simulation.tick method advances the simulation one tick
   network.tick();
-  for (let i = 0, l = network.data.length; i < l; i += 1) {
-    const d = network.data[i];
+  for (let i = 0, l = network.nodeData.length; i < l; i += 1) {
+    const d = network.nodeData[i];
     ctx.beginPath();
     ctx.arc(d.pos[0], d.pos[1], d.radius, 0, 2 * Math.PI);
     ctx.fillStyle = colourValues[d.colour]; // eslint-disable-line no-param-reassign
     ctx.fill();
+  }
+  for (let i = 0, l = network.lineData.length; i < l; i += 1) {
+    const nodeOne = network.nodeData[network.lineData[i].node1];
+    const nodeTwo = network.nodeData[network.lineData[i].node2];
+    ctx.beginPath();
+    ctx.strokeStyle = 'white'; // eslint-disable-line no-param-reassign
+    ctx.moveTo(nodeOne.pos[0], nodeOne.pos[1]);
+    ctx.lineTo(nodeTwo.pos[0], nodeTwo.pos[1]);
+    ctx.stroke();
   }
 }
 export default {
@@ -139,7 +148,7 @@ export default {
       for (let i = 0; i < 100; i += 1) {
         const radius = d3.randomUniform(2, 5)();
         // Add a circle to your simulation with simulation.add
-        network.add({
+        network.addNode({
           colour: d3.randomInt(0, 10)(),
           speed: d3.randomUniform(1.5, 3)(),
           angle: d3.randomUniform(0, 360)(),
@@ -150,6 +159,16 @@ export default {
           radius,
         });
       }
+      const nodeOne = d3.randomInt(0, network.nodeData.length)();
+      let nodeTwo = nodeOne;
+      do {
+        nodeTwo = d3.randomInt(0, network.nodeData.length)();
+      } while (nodeOne === nodeTwo);
+
+      network.addLine({
+        node1: nodeOne,
+        node2: nodeTwo,
+      });
       return network;
     },
   },
