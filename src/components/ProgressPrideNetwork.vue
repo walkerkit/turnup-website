@@ -183,8 +183,11 @@ export default {
       //   - width
       //   - height
       network.init();
+      const pixelCount = network.width * network.height;
+      const count = Math.floor(pixelCount / (Math.sqrt(pixelCount) * 10));
+
       // We'll create 100 circles of random radii, moving in random directions at random speeds.
-      for (let i = 0; i < 100; i += 1) {
+      for (let i = 0; i < count; i += 1) {
         const radius = d3.randomUniform(2, 5)();
         // Add a circle to your simulation with simulation.add
         network.addNode({
