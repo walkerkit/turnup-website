@@ -89,6 +89,41 @@ class Simulation {
       }
       d.pos = geometric.pointTranslate(d.pos, d.angle, d.speed);
     }
+    this.lineData = [];
+    // let remainderList = this.nodeData; // eslint-disable-line
+    let remainderList = []; // eslint-disable-line
+
+    for (let i = 0; i < this.nodeData.length; i += 1) {
+      remainderList.push(i);
+    }
+    do {
+      const tempNode = this.nodeData[remainderList[0]];
+      remainderList = remainderList.slice(1);
+      console.log(remainderList);
+      let distanceList = [];
+      for (let j = 0; j < remainderList.length; j += 1) {
+        const xdiff = Math.abs(tempNode.pos[0] - this.nodeData[remainderList[j]].pos[0]); //eslint-disable-line
+        const ydiff = Math.abs(tempNode.pos[1] - this.nodeData[remainderList[j]].pos[1]); // eslint-disable-line
+        const distance = Math.sqrt(xdiff ** 2 + ydiff ** 2);
+        distanceList.push([this.nodeData[remainderList[j]].index, distance]);
+      }
+      distanceList = distanceList.sort((a, b) => a[1] - b[1]);
+
+      const lineList = distanceList.slice(0, 2);
+      console.log(lineList);
+      for (let k = 0; k < lineList.length; k += 1) {
+        this.addLine(
+          {
+            node1: tempNode.index,
+            node2: lineList[k][0],
+          },
+        );
+      }
+      for (let l = 0; l < lineList.length; l += 1) {
+        remainderList.splice(l, 1);
+      }
+    } while (remainderList.length !== 0);
+    console.log(this.lineData);
   }
 }
 const colourValues = [
@@ -105,25 +140,26 @@ const colourValues = [
   '#FFFFFF',
 ];
 function animationTick(ctx, network, canvas) {
+// function animationTick(ctx, network) {
   requestAnimationFrame(() => animationTick(ctx, network, canvas));
   ctx.clearRect(0, 0, network.width, network.height);
   // The simulation.tick method advances the simulation one tick
   network.tick();
+  for (let i = 0, l = network.lineData.length; i < l; i += 1) {
+    const nodeOne = network.nodeData[network.lineData[i].node1];
+    const nodeTwo = network.nodeData[network.lineData[i].node2];
+    ctx.beginPath();
+    ctx.strokeStyle = '#333'; // eslint-disable-line no-param-reassign
+    ctx.moveTo(nodeOne.pos[0], nodeOne.pos[1]);
+    ctx.lineTo(nodeTwo.pos[0], nodeTwo.pos[1]);
+    ctx.stroke();
+  }
   for (let i = 0, l = network.nodeData.length; i < l; i += 1) {
     const d = network.nodeData[i];
     ctx.beginPath();
     ctx.arc(d.pos[0], d.pos[1], d.radius, 0, 2 * Math.PI);
     ctx.fillStyle = colourValues[d.colour]; // eslint-disable-line no-param-reassign
     ctx.fill();
-  }
-  for (let i = 0, l = network.lineData.length; i < l; i += 1) {
-    const nodeOne = network.nodeData[network.lineData[i].node1];
-    const nodeTwo = network.nodeData[network.lineData[i].node2];
-    ctx.beginPath();
-    ctx.strokeStyle = 'white'; // eslint-disable-line no-param-reassign
-    ctx.moveTo(nodeOne.pos[0], nodeOne.pos[1]);
-    ctx.lineTo(nodeTwo.pos[0], nodeTwo.pos[1]);
-    ctx.stroke();
   }
 }
 export default {
@@ -132,7 +168,7 @@ export default {
     const network = this.networkInit();
     this.$refs.canvas.width = network.width;
     this.$refs.canvas.height = network.height;
-    this.$refs.canvas.style.background = '#000';
+    this.$refs.canvas.style.background = '#111';
     const ctx = this.$refs.canvas.getContext('2d');
     animationTick(ctx, network, this.$refs.canvas);
   },
@@ -149,6 +185,7 @@ export default {
         const radius = d3.randomUniform(2, 5)();
         // Add a circle to your simulation with simulation.add
         network.addNode({
+          index: i,
           colour: d3.randomInt(0, 10)(),
           speed: d3.randomUniform(1.5, 3)(),
           angle: d3.randomUniform(0, 360)(),
