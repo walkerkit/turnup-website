@@ -5,7 +5,7 @@
 #progress-pride-canvas {
   height: 100vh;
   width: 100vw;
-  background-color: #353839;
+  background-color: #202329;
 }
 </style>
 <script>
