@@ -19,6 +19,7 @@ class Simulation {
     this.center = [this.width / 2, this.height / 2];
     this.nodeData = [];
     this.lineData = [];
+    this.mousePosition = [-1, -1];
     return this;
   }
 
@@ -69,7 +70,17 @@ class Simulation {
             d.collided = true;
             d0.collided = true;
           }
+
           break;
+        }
+        if (this.mousePosition[0] > 0 && this.mousePosition[1] > 0) {
+            const xdiff = Math.abs(d0.pos[0] - this.mousePosition[0])**2 ; //eslint-disable-line
+            const ydiff = Math.abs(d0.pos[1] - this.mousePosition[1])**2; // eslint-disable-line
+          const distance = Math.sqrt(xdiff + ydiff);
+          if (distance < 100) {
+            console.log(distance);
+            d0.speed *= 0.1;
+          }
         }
       }
       // Detect sides
@@ -123,9 +134,6 @@ class Simulation {
           },
         );
       }
-      // for (let m = 0; m < lineList.length; m += 1) {
-      //   remainderList.splice(m, 1);
-      // }
     } while (remainderList.length > interConnectCount);
   }
 }
@@ -170,9 +178,11 @@ export default {
   name: 'ProgressPrideNetwork',
   created() {
     window.addEventListener('resize', this.windowResize);
+    window.addEventListener('mousemove', this.mouseMove);
   },
   destroyed() {
     window.removeEventListener('resize', this.windowResize);
+    window.removeEventListener('mousemove', this.mouseMove);
   },
   mounted() {
     this.network = this.networkInit();
@@ -231,6 +241,10 @@ export default {
       this.$refs.canvas.width = e.target.innerWidth;
       this.network.height = e.target.innerHeight;
       this.$refs.canvas.height = e.target.innerHeight;
+    },
+    mouseMove(e) {
+      this.network.mousePosition[0] = e.clientX;
+      this.network.mousePosition[1] = e.clientY;
     },
   },
 };
