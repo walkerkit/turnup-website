@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 <template>
     <canvas ref="canvas" />
 </template>
@@ -105,38 +107,56 @@ class Simulation {
       xPos[Math.floor(node.pos[0])] = i;
       yPos[Math.floor(node.pos[1])] = i;
     }
-
     do {
       const tempNode = this.nodeData[remainderList[0]];
       remainderList.shift();
 
-      const xList = [];
-      const yList = {};
-
       const intPosX = Math.floor(tempNode.pos[0]);
-      const intPosY = Math.floor(tempNode.pos[1]);
+      // const intPosY = Math.floor(tempNode.pos[1]);
 
-      for (let j = 0; j < this.width * 0.15 * 2; j += 1) {
-        if (Object.prototype.hasOwnProperty.call(xPos, Math.max(0, intPosX - this.width * 0.15 + j))) {  // eslint-disable-line
-          xList.push(xPos[intPosX - this.width * 0.15 + j]);
-        }
-      }
-      for (let i = 0; i < this.width * 0.15 * 2; i += 1) {
-        if (Object.prototype.hasOwnProperty.call(yPos, Math.max(0, intPosY - this.width * 0.15 + i))) {  // eslint-disable-line
-          yList[yPos[intPosY - this.width * 0.15 + i]] = true;
-        }
-      }
+      const targetHalfList = interConnectCount / 2;
+      const xBelowList = [];
 
-      xList.forEach((idx) => {
-        if (yList[idx]) {
-          this.addLine(
-            {
-              node1: tempNode.index,
-              node2: idx,
-            },
-          );
+      let boundary = false;
+      let i = 0;
+
+      // Find X Lower
+      do {
+        if (Object.prototype.hasOwnProperty.call(xPos, intPosX - i)) {
+          xBelowList.push(xPos[intPosX - i]);
         }
-      });
+        if (intPosX - i < 0) {
+          boundary = true;
+        }
+        i += 1;
+      } while (xBelowList.length < targetHalfList && boundary === false);
+
+      // Find X Upper
+      boundary = false;
+      i = 0;
+      const xAboveList = [];
+      do {
+        if (Object.prototype.hasOwnProperty.call(xPos, intPosX + i)) {
+          xAboveList.push(xPos[intPosX + i]);
+        }
+        if (intPosX + i > this.width) {
+          boundary = true;
+        }
+        i += 1;
+      } while (xAboveList.length < targetHalfList && boundary === false);
+
+      const yAboveList = [];
+      do {
+        if (Object.prototype.hasOwnProperty.call(xPos, intPosX + i)) {
+          yAboveList.push(xPos[intPosX + i]);
+        }
+        if (intPosX + i > this.width) {
+          boundary = true;
+        }
+        i += 1;
+      } while (yAboveList.length < targetHalfList && boundary === false);
+
+      // const xList = xBelowList.concat(xAboveList);
     } while (remainderList.length > interConnectCount);
   }
 }
