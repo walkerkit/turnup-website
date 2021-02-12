@@ -90,39 +90,53 @@ class Simulation {
       d.pos = geometric.pointTranslate(d.pos, d.angle, d.speed);
     }
     this.lineData.length = 0;
-    // let remainderList = this.nodeData; // eslint-disable-line
+
     let remainderList = []; // eslint-disable-line
     const interConnectCount = 2;
     for (let i = 0; i < this.nodeData.length; i += 1) {
       remainderList.push(i);
     }
+
+    const xPos = {};
+    const yPos = {};
+
+    for (let i = 0; i < this.nodeData.length; i += 1) {
+      const node = this.nodeData[i];
+      xPos[Math.floor(node.pos[0])] = i;
+      yPos[Math.floor(node.pos[1])] = i;
+    }
+
     do {
       const tempNode = this.nodeData[remainderList[0]];
-      remainderList = remainderList.slice(1);
-      let distanceList = [];
-      for (let j = 0; j < remainderList.length; j += 1) {
-        const xdiff = Math.abs(tempNode.pos[0] - this.nodeData[remainderList[j]].pos[0])**2 ; //eslint-disable-line
-        const ydiff = Math.abs(tempNode.pos[1] - this.nodeData[remainderList[j]].pos[1])**2; // eslint-disable-line
-        const distance = Math.sqrt(xdiff + ydiff);
-        distanceList.push([this.nodeData[remainderList[j]].index, distance]);
-      }
-      distanceList = distanceList.sort((a, b) => a[1] - b[1]);
+      remainderList.shift();
 
-      const lineList = [];
-      for (let k = 0; k < interConnectCount; k += 1) {
-        if (distanceList[k][1] < this.width * 0.15) {
-          lineList.push(distanceList[k]);
+      const xList = [];
+      const yList = {};
+
+      const intPosX = Math.floor(tempNode.pos[0]);
+      const intPosY = Math.floor(tempNode.pos[1]);
+
+      for (let j = 0; j < this.width * 0.15 * 2; j += 1) {
+        if (Object.prototype.hasOwnProperty.call(xPos, Math.max(0, intPosX - this.width * 0.15 + j))) {  // eslint-disable-line
+          xList.push(xPos[intPosX - this.width * 0.15 + j]);
+        }
+      }
+      for (let i = 0; i < this.width * 0.15 * 2; i += 1) {
+        if (Object.prototype.hasOwnProperty.call(yPos, Math.max(0, intPosY - this.width * 0.15 + i))) {  // eslint-disable-line
+          yList[yPos[intPosY - this.width * 0.15 + i]] = true;
         }
       }
 
-      for (let l = 0; l < lineList.length; l += 1) {
-        this.addLine(
-          {
-            node1: tempNode.index,
-            node2: lineList[l][0],
-          },
-        );
-      }
+      xList.forEach((idx) => {
+        if (yList[idx]) {
+          this.addLine(
+            {
+              node1: tempNode.index,
+              node2: idx,
+            },
+          );
+        }
+      });
     } while (remainderList.length > interConnectCount);
   }
 }
@@ -140,8 +154,8 @@ const colourValues = [
   '#FFFFFF',
 ];
 function animationTick(ctx, network, canvas) {
-// function animationTick(ctx, network) {
   requestAnimationFrame(() => animationTick(ctx, network, canvas));
+
   ctx.clearRect(0, 0, network.width, network.height);
   // The simulation.tick method advances the simulation one tick
   network.tick();
@@ -149,7 +163,8 @@ function animationTick(ctx, network, canvas) {
     const nodeOne = network.nodeData[network.lineData[i].node1];
     const nodeTwo = network.nodeData[network.lineData[i].node2];
     ctx.beginPath();
-    ctx.strokeStyle = '#333'; // eslint-disable-line no-param-reassign
+    // ctx.strokeStyle = '#333'; // eslint-disable-line no-param-reassign
+    ctx.strokeStyle = '#FF00FF'; // eslint-disable-line no-param-reassign
     ctx.moveTo(nodeOne.pos[0], nodeOne.pos[1]);
     ctx.lineTo(nodeTwo.pos[0], nodeTwo.pos[1]);
     ctx.stroke();
@@ -192,11 +207,11 @@ export default {
       //   - width
       //   - height
       network.init();
-      // const pixelCount = network.width * network.height;
-      // const count = Math.floor(pixelCount / (Math.sqrt(pixelCount) * 10));
+      const pixelCount = network.width * network.height;
+      const count = Math.floor(pixelCount / (Math.sqrt(pixelCount) * 10));
 
       // We'll create 100 circles of random radii, moving in random directions at random speeds.
-      for (let i = 0; i < 50; i += 1) {
+      for (let i = 0; i < count; i += 1) {
         const radius = d3.randomUniform(2, 5)();
         // Add a circle to your simulation with simulation.add
         network.addNode({
@@ -211,7 +226,6 @@ export default {
           radius,
         });
       }
-      console.log(network.nodeData);
       const nodeOne = d3.randomInt(0, network.nodeData.length)();
       let nodeTwo = nodeOne;
       do {

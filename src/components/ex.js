@@ -1,6 +1,5 @@
 /* eslint-disable */
 
-// let remainderList = []; // eslint-disable-line
 // const interConnectCount = 2;
 // for (let i = 0; i < this.nodeData.length; i += 1) {
 //   remainderList.push(i);
@@ -135,6 +134,7 @@ const nodeData = [{
 }, {
   index: 49, colour: 4, speed: 2.462936671896989, angle: 156.05699008368316, pos: [1782.3142924771305, 249.11314955543247], radius: 4.30286184347289, collided: false,
 }];
+let remainderList = [];
 
 const xPos = {};
 const yPos = {};
@@ -146,7 +146,7 @@ for (let i = 0; i < nodeData.length; i += 1) {
 }
 
 do {
-  const tempNode = nodeData[remainderList[0]];
+  const tempNode = this.nodeData[remainderList[0]];
   remainderList = remainderList.slice(1);
 
   const xList = {};
@@ -166,17 +166,16 @@ do {
     }
   }
 
-    for (const [key, value] of xList.entries()) {
-      if (yList[key]){
-          
+  for (const [key, value] of xList.entries()) {
+    if (yList[key]) {
+      if (yList[xList[l]]) {
+        this.addLine(
+          {
+            node1: tempNode.index,
+            node2: value.index,
+          },
+        );
       }
     }
-  // if (yList[xList[l]]) {
-  //   this.addLine(
-  //     {
-  //       node1: tempNode.index,
-  //       node2: lineList[l][0],
-  //     },
-  //   );
-  // }
+  }
 } while (remainderList.length > interConnectCount);
