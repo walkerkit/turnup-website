@@ -123,9 +123,6 @@ class Simulation {
           },
         );
       }
-      // for (let m = 0; m < lineList.length; m += 1) {
-      //   remainderList.splice(m, 1);
-      // }
     } while (remainderList.length > interConnectCount);
   }
 }
@@ -195,11 +192,11 @@ export default {
       //   - width
       //   - height
       network.init();
-      const pixelCount = network.width * network.height;
-      const count = Math.floor(pixelCount / (Math.sqrt(pixelCount) * 10));
+      // const pixelCount = network.width * network.height;
+      // const count = Math.floor(pixelCount / (Math.sqrt(pixelCount) * 10));
 
       // We'll create 100 circles of random radii, moving in random directions at random speeds.
-      for (let i = 0; i < count; i += 1) {
+      for (let i = 0; i < 50; i += 1) {
         const radius = d3.randomUniform(2, 5)();
         // Add a circle to your simulation with simulation.add
         network.addNode({
@@ -214,6 +211,7 @@ export default {
           radius,
         });
       }
+      console.log(network.nodeData);
       const nodeOne = d3.randomInt(0, network.nodeData.length)();
       let nodeTwo = nodeOne;
       do {
