@@ -99,64 +99,59 @@ class Simulation {
       remainderList.push(i);
     }
 
-    const xPos = {};
-    const yPos = {};
+    const xPos = [];
+    const yPos = [];
 
     for (let i = 0; i < this.nodeData.length; i += 1) {
       const node = this.nodeData[i];
-      xPos[Math.floor(node.pos[0])] = i;
-      yPos[Math.floor(node.pos[1])] = i;
+      xPos.push([Math.floor(node.pos[0]), i]);
+      yPos.push([Math.floor(node.pos[1]), i]);
     }
+
+    const xPosSort = xPos.sort((a, b) => a[0] - b[0]);
+    const yPosSort = yPos.sort((a, b) => a[0] - b[0]);
+
+    const xPosDict = {};
+    const yPosDict = {};
+
+    xPosSort.forEach((x, idx) => {
+      xPosDict[x[1]] = [x[1], idx, x[0]];
+      // xPosDict[nodeIndex] = [nodeIndex, sortIndex, xPos]
+    });
+
+    yPosSort.forEach((y, idx) => {
+      yPosDict[y[1]] = [y[1], idx, y[0]];
+      // yPosDict[nodeIndex] = [nodeIndex, sortIndex, yPos]
+    });
+
     do {
       const tempNode = this.nodeData[remainderList[0]];
       remainderList.shift();
 
-      const intPosX = Math.floor(tempNode.pos[0]);
-      // const intPosY = Math.floor(tempNode.pos[1]);
+      const xList = [];
+      const yList = [];
 
-      const targetHalfList = interConnectCount / 2;
-      const xBelowList = [];
-
-      let boundary = false;
-      let i = 0;
-
-      // Find X Lower
-      do {
-        if (Object.prototype.hasOwnProperty.call(xPos, intPosX - i)) {
-          xBelowList.push(xPos[intPosX - i]);
+      const tempNodeXSortPos = xPosDict[tempNode.index][1];
+      for (let i = tempNodeXSortPos - interConnectCount / 2; i < tempNodeXSortPos + interConnectCount / 2; i += 1) { // eslint-disable-line
+        if (i in xPosDict) {
+          xList.push(xPosDict[i][0]);
         }
-        if (intPosX - i < 0) {
-          boundary = true;
+      }
+      const tempNodeYSortPos = yPosDict[tempNode.index][1];
+      for (let i = tempNodeYSortPos - interConnectCount / 2; i < tempNodeYSortPos + interConnectCount / 2; i += 1) { // eslint-disable-line
+        if (i in yPosDict) {
+          yList[yPosDict[i][0]] = true;
         }
-        i += 1;
-      } while (xBelowList.length < targetHalfList && boundary === false);
-
-      // Find X Upper
-      boundary = false;
-      i = 0;
-      const xAboveList = [];
-      do {
-        if (Object.prototype.hasOwnProperty.call(xPos, intPosX + i)) {
-          xAboveList.push(xPos[intPosX + i]);
+      }
+      console.log(xList, yList);
+      xList.forEach((index) => {
+        if (yList[index]) {
+          this.addLine({
+            node1: tempNode.index,
+            node2: index,
+          });
         }
-        if (intPosX + i > this.width) {
-          boundary = true;
-        }
-        i += 1;
-      } while (xAboveList.length < targetHalfList && boundary === false);
-
-      const yAboveList = [];
-      do {
-        if (Object.prototype.hasOwnProperty.call(xPos, intPosX + i)) {
-          yAboveList.push(xPos[intPosX + i]);
-        }
-        if (intPosX + i > this.width) {
-          boundary = true;
-        }
-        i += 1;
-      } while (yAboveList.length < targetHalfList && boundary === false);
-
-      // const xList = xBelowList.concat(xAboveList);
+      });
     } while (remainderList.length > interConnectCount);
   }
 }
@@ -174,7 +169,9 @@ const colourValues = [
   '#FFFFFF',
 ];
 function animationTick(ctx, network, canvas) {
-  requestAnimationFrame(() => animationTick(ctx, network, canvas));
+  setTimeout(() => {
+    requestAnimationFrame(() => animationTick(ctx, network, canvas));
+  }, 100000);
 
   ctx.clearRect(0, 0, network.width, network.height);
   // The simulation.tick method advances the simulation one tick
