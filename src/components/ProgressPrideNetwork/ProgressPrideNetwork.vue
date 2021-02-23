@@ -1,13 +1,6 @@
 <template>
     <canvas ref="canvas" />
 </template>
-<style scoped>
-#progress-pride-canvas {
-  height: 100vh;
-  width: 100vw;
-  background-color: #202329;
-}
-</style>
 <script>
 const geometric = require('geometric');
 const d3 = require('d3-random');
@@ -90,7 +83,6 @@ class Simulation {
       d.pos = geometric.pointTranslate(d.pos, d.angle, d.speed);
     }
     this.lineData.length = 0;
-    // let remainderList = this.nodeData; // eslint-disable-line
     let remainderList = []; // eslint-disable-line
     const interConnectCount = 2;
     for (let i = 0; i < this.nodeData.length; i += 1) {
@@ -123,9 +115,6 @@ class Simulation {
           },
         );
       }
-      // for (let m = 0; m < lineList.length; m += 1) {
-      //   remainderList.splice(m, 1);
-      // }
     } while (remainderList.length > interConnectCount);
   }
 }
@@ -157,7 +146,7 @@ function animationTick(ctx, network, canvas) {
     ctx.lineTo(nodeTwo.pos[0], nodeTwo.pos[1]);
     ctx.stroke();
   }
-  for (let i = 0, l = network.nodeData.length; i < l; i += 1) {
+  for (let i = 0; i < network.nodeData.length; i += 1) {
     const d = network.nodeData[i];
     ctx.beginPath();
     ctx.arc(d.pos[0], d.pos[1], d.radius, 0, 2 * Math.PI);
@@ -190,22 +179,18 @@ export default {
   methods: {
     networkInit() {
       const network = new Simulation();
-      // Initialize this simulation with simulation.init
-      // You can pass an optional configuration object to init with the properties:
-      //   - width
-      //   - height
+
       network.init();
       const pixelCount = network.width * network.height;
-      const count = Math.floor(pixelCount / (Math.sqrt(pixelCount) * 10));
+      const count = Math.floor(pixelCount / (Math.sqrt(pixelCount) * 15));
 
-      // We'll create 100 circles of random radii, moving in random directions at random speeds.
       for (let i = 0; i < count; i += 1) {
         const radius = d3.randomUniform(2, 5)();
         // Add a circle to your simulation with simulation.add
         network.addNode({
           index: i,
           colour: d3.randomInt(0, 10)(),
-          speed: d3.randomUniform(1.5, 2.5)(),
+          speed: d3.randomUniform(1.5, 2)(),
           angle: d3.randomUniform(0, 360)(),
           pos: [
             d3.randomUniform(radius, network.width - radius)(),

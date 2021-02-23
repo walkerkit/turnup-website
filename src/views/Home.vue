@@ -15,7 +15,7 @@
 
 <script>
 // @ is an alias to /src
-import ProgressPrideNetwork from '@/components/ProgressPrideNetwork.vue';
+import ProgressPrideNetwork from '@/components/ProgressPrideNetwork/ProgressPrideNetwork.vue';
 import './home.sass';
 
 export default {
